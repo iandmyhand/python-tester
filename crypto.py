@@ -49,6 +49,7 @@ Encode with RSA Public PEM Key string
 _decoded_public_key = base64.standard_b64decode(_rsa_public_pem_key_string.encode('utf-8'))
 _rsa_public_key_pkcs1 = PKCS1_v1_5.new(RSA.importKey(_decoded_public_key))
 _encrypted_data = _rsa_public_key_pkcs1.encrypt(_plain_string.encode('utf-8'))
+_encrypted_string = base64.standard_b64encode(_encrypted_data).decode('utf-8')
 
 """
 Decode with RSA Private PEM Key string
@@ -56,7 +57,7 @@ Decode with RSA Private PEM Key string
 _decoded_private_key = base64.standard_b64decode(_rsa_private_pem_key_string.encode('utf-8'))
 _rsa_private_key_pkcs1 = PKCS1_v1_5.new(RSA.importKey(_decoded_private_key))
 _error = dict()
-_decrypted_bytes = _rsa_private_key_pkcs1.decrypt(_encrypted_data, _error)
+_decrypted_bytes = _rsa_private_key_pkcs1.decrypt(base64.standard_b64decode(_encrypted_string.encode('utf-8')), _error)
 _decrypted_string = _decrypted_bytes.decode('utf-8')
 assert(_plain_string == _decrypted_string)
 
