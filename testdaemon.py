@@ -1,4 +1,5 @@
 import logging
+import os
 import random
 import threading
 import time
@@ -8,10 +9,13 @@ from daemon import runner
 from queue import Queue
 
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+
 class ProducerThread(threading.Thread):
     def __init__(self, group=None, target=None, name=None,
                  args=(), kwargs=None, verbose=None):
-        super(ProducerThread,self).__init__()
+        super(ProducerThread, self).__init__()
         self.target = target
         self.name = name
         self.q = kwargs.get('q')
@@ -23,8 +27,8 @@ class ProducerThread(threading.Thread):
             if not self.q.full():
                 item = random.randint(1,10)
                 self.q.put(item)
-                self.logger.info('Putting ' + str(item)  
-                              + ' : ' + str(self.q.qsize()) + ' items in queue')
+                self.logger.info('Putting ' + str(item)
+                                 + ' : ' + str(self.q.qsize()) + ' items in queue')
                 time.sleep(random.random())
         return
 
@@ -32,7 +36,7 @@ class ProducerThread(threading.Thread):
 class ConsumerThread(threading.Thread):
     def __init__(self, group=None, target=None, name=None,
                  args=(), kwargs=None, verbose=None):
-        super(ConsumerThread,self).__init__()
+        super(ConsumerThread, self).__init__()
         self.target = target
         self.name = name
         self.q = kwargs.get('q')
@@ -44,7 +48,7 @@ class ConsumerThread(threading.Thread):
             if not self.q.empty():
                 item = self.q.get()
                 self.logger.info('Getting ' + str(item) 
-                              + ' : ' + str(self.q.qsize()) + ' items in queue')
+                                 + ' : ' + str(self.q.qsize()) + ' items in queue')
                 time.sleep(random.random())
         return
 
@@ -55,11 +59,13 @@ class QueuedBatch(object):
     
     def __init__(self):
         self.stdin_path = '/dev/null'
-        self.stdout_path = '/dev/null'
-        self.stderr_path = '/dev/null'
-        self.pidfile_path =  '/Users/admin/Documents/tests/python-tester/python-tester/testdaemon.pid'
+        self.stdout_path = BASE_DIR + '/logs/out.log'
+        self.stderr_path = BASE_DIR + '/logs/err.log'
+        self.pidfile_path = BASE_DIR + '/logs/daemon.pid'
         self.pidfile_timeout = 5
         self.q = Queue(self.BUF_SIZE)
+        self.p = None
+        self.c = None
             
     def run(self):
 
@@ -84,11 +90,11 @@ app = QueuedBatch()
 logger = logging.getLogger("DaemonLog")
 logger.setLevel(logging.INFO)
 formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-handler = logging.FileHandler("/Users/admin/Documents/tests/python-tester/python-tester/testdaemon.log")
+handler = logging.FileHandler(BASE_DIR + '/logs/daemon.log')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 daemon_runner = runner.DaemonRunner(app)
 # This ensures that the logger file handle does not get closed during daemonization.
-daemon_runner.daemon_context.files_preserve=[handler.stream]
+daemon_runner.daemon_context.files_preserve = [handler.stream]
 daemon_runner.do_action()
