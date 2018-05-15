@@ -1,5 +1,5 @@
-uWSGI==2.0.13.1
+#uWSGI==2.0.13.1
 boto==2.42.0
-celery==https://github.com/celery/celery/zipball/master#egg=celery
+#celery==https://github.com/celery/celery/zipball/master#egg=celery
 python-daemon==2.1.1
 pycrypto==2.6.1
