@@ -3,3 +3,4 @@ boto==2.42.0
 #celery==https://github.com/celery/celery/zipball/master#egg=celery
 python-daemon==2.1.1
 pycrypto==2.6.1
+boto3==1.36.2
