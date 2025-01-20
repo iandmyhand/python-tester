@@ -45,6 +45,11 @@ def send_email(
             If None, the email is not a reply.
             You can get the message ID from previous emails sent using Amazon SES.
             In the response, look for the "MessageId" key.
+            This shouldn't be the same as the "Message-ID" header in the previous sent email.
+            If you put the Gmail's message ID, it will be threaded with the message ID in Gmail.
+            So you can choose the message ID that you want to thread with.
+            Just you need to care about the format of the message ID,
+            it should be ended with domain like this: MESSAGE_ID@address.com
     """
     msg = MIMEMultipart("alternative")
     msg["From"] = sender
