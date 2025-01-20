@@ -10,8 +10,8 @@ from aws.ses import send_email
 def send_email_via_ses():
     charset = "UTF-8"
     configuration_set = "my-configuration-set"  # Set up in AWS SES console
-    sender = "sender@abc.com"  # Verified sender email that is set up in AWS SES
-    recipient = "receiver@def.com"
+    sender = "SENDER@ABC.COM"  # Verified sender email that is set up in AWS SES
+    recipients = ["RECEIVER@DEF.COM"]
     subject = "Test Email"
     sample_unsubscribe_token = "sampleToken"
     headers = {
@@ -30,10 +30,11 @@ def send_email_via_ses():
     """
     # Message ID in the previous email sent result or received email.
     # If you want to send a new email, set thread_mail_message_id to None.
+    thread_mail_message_id = "CAArqWG5ghz9dZsXmj7aTuqXv+N_waqYCzZKx+K2MpxGpsiOw2w@mail.gmail.com"
     thread_mail_message_id = "010c0194827de619-5d5b5847-b23e-4ec5-9c90-4b1d3147d80d-000000"
     thread_mail_message_id = None
     send_email(
-        sender, recipient, charset, subject, body_text, body_html, configuration_set, headers, thread_mail_message_id
+        sender, recipients, charset, subject, body_text, body_html, configuration_set, headers, thread_mail_message_id
     )
 
 

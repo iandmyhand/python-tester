@@ -14,6 +14,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.generator import BytesGenerator
 from io import BytesIO
+import re
 
 import boto3
 from botocore.exceptions import NoCredentialsError, PartialCredentialsError
@@ -21,7 +22,7 @@ from botocore.exceptions import NoCredentialsError, PartialCredentialsError
 
 def send_email(
     sender: str,
-    recipient: str,
+    recipients: list[str],
     charset: str,
     subject: str,
     body_text: str,
@@ -33,7 +34,7 @@ def send_email(
     """Send an email using Amazon SES.
     Args:
         sender (str): The email address that sends the email.
-        recipient (str): The email address that receives the email.
+        recipients (list[str]): The email addresses that receive the email.
         headers (dict): Additional headers to include in the email.
         charset (str): The character encoding for the email.
         subject (str): The subject of the email.
@@ -53,20 +54,25 @@ def send_email(
     """
     msg = MIMEMultipart("alternative")
     msg["From"] = sender
-    msg["To"] = recipient
+    msg["To"] = ", ".join(recipients)
     msg["ReplyToAddresses"] = sender
     if thread_mail_message_id:
         if not subject.startswith("Re:"):
             msg["Subject"] = f"Re: {subject}"
         else:
             msg["Subject"] = subject
-        msg["In-Reply-To"] = f"<{thread_mail_message_id}>@ap-northeast-2.amazonses.com"
-        msg["References"] = f"<{thread_mail_message_id}>@ap-northeast-2.amazonses.com"
+        if not contains_email_address(thread_mail_message_id):
+            msg["In-Reply-To"] = f"{thread_mail_message_id}@ap-northeast-2.amazonses.com"
+            msg["References"] = f"{thread_mail_message_id}@ap-northeast-2.amazonses.com"
+        else:
+            msg["In-Reply-To"] = f"{thread_mail_message_id}"
+            msg["References"] = f"{thread_mail_message_id}"
     else:
         msg["Subject"] = subject
     if headers:
         for key, value in headers.items():
             msg[key] = value
+
     msg.attach(MIMEText(body_text, "plain", charset))
     msg.attach(MIMEText(body_html, "html", charset))
 
@@ -78,9 +84,7 @@ def send_email(
         ses_client = boto3.client("ses", region_name="ap-northeast-2")
         response = ses_client.send_raw_email(
             Source=sender,
-            Destinations=[
-                recipient,
-            ],
+            Destinations=recipients,
             RawMessage={
                 "Data": raw_message.read(),
             },
@@ -93,3 +97,9 @@ def send_email(
         print("Incomplete AWS credentials provided.")
     except Exception as e:
         print(f"Failed to send email: {e}")
+
+
+def contains_email_address(message_id):
+    # Regular expression for standard email address
+    pattern = r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+    return re.search(pattern, message_id) is not None
