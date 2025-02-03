@@ -36,6 +36,17 @@ def send_email(
         sender (str): The email address that sends the email.
         recipients (list[str]): The email addresses that receive the email.
         headers (dict): Additional headers to include in the email.
+            If you want to put Gmail's One-Click Unsubscribe button in the Gmail client,
+            you should setup SPF, DKIM, and DMARC for your domain.
+            Please refer below link:
+            https://support.google.com/a/answer/81126?hl=en&sjid=3499273166262528914-NC#requirements-5k&zippy=Crequirements-for-sending-or-more-messages-per-day
+            Also, you should add the List-Unsubscribe-Post and List-Unsubscribe headers.
+            Example:
+            {
+                "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+                "List-Unsubscribe": f"<https://yourdomain.com/unsubscribe/{UNSUBSCRIBE_TOKEN}>",
+                ...
+            }
         charset (str): The character encoding for the email.
         subject (str): The subject of the email.
         body_text (str): The plain text content of the email.
